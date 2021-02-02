@@ -9,6 +9,7 @@ import TrackList from "../TrackList/TrackList";
 class App extends React.Component {
   constructor(props) {
     super(props);
+    
     this.state = {
       searchResults: [{name: 'name1', artist: 'artist1', album: 'album1', id:'1'},
       {name: 'name2', artist: 'artist2', album: 'album2', id:'2'},
@@ -16,9 +17,30 @@ class App extends React.Component {
       playListName: 'Best of',
       playListTracks: [{name: 'pname1', artist: 'partist1', album: 'palbum1', id:'4'},
       {name: 'pname2', artist: 'partist2', album: 'palbum2', id:'5'},
-      {name: 'pname3', artist: 'partist3', album: 'palbum3', id:'6'}],
-    }
+      {name: 'pname3', artist: 'partist3', album: 'palbum3', id:'6'}]
+    };
+    this.addTrack = this.addTrack.bind(this);
+    this.removeTrack = this.removeTrack.bind(this);
   }
+
+addTrack(track) {
+  let tracks = this.state.playListTracks;
+  if(tracks.find(savedTrack => savedTrack.id === track.id)) {
+    return;
+  }
+  tracks.push(track);
+  this.setState({playListTracks: tracks});  
+}
+
+removeTrack(track) {
+  let tracks = this.state.playListTracks;
+  tracks = tracks.filter(currentTrack => currentTrack.id !== track.id);
+
+  this.setState({ playListTracks: tracks}); 
+}
+
+
+
   render() {
     return(
       <div>
@@ -26,9 +48,12 @@ class App extends React.Component {
   <div className="App">
     <SearchBar />
     <div className="App-playlist">
-      <SearchResults searchResults={this.state.searchResults} />
+      <SearchResults searchResults={this.state.searchResults} 
+      onAdd={this.addTrack}
+      />
       <Playlist playListName={this.state.playListName}
                 playListTracks={this.state.playListTracks}
+                onRemove = {this.removeTrack}
       />
       {/* <TrackList trackList = {this.state.trackList} /> */}
     </div>
