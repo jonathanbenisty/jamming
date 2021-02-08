@@ -6,6 +6,7 @@ import SearchResults from "../SearchResults/SearchResults";
 import Playlist from "../Playlist/Playlist";
 
 import Spotify  from "../../util/Spotify";
+import hash from "../../util/hash";
 
 class App extends React.Component {
   constructor(props) {
@@ -16,12 +17,32 @@ class App extends React.Component {
       playListName: 'Best of',
       playListTracks: []
     };
+
+    this.spotify = Spotify
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
     this.updatePlaylistName = this.updatePlaylistName.bind(this);
     this.savePlaylist = this.savePlaylist.bind(this);
     this.search = this.search.bind(this);
   }
+
+
+  componentDidMount() {
+    
+    let _token = hash.access_token;
+    console.info({_token})
+    if (_token) {
+       
+      this.spotify.token = _token
+      this.setState({
+        token: _token
+      });
+      
+    }
+
+
+  }
+
 
 addTrack(track) {
   let tracks = this.state.playListTracks;
@@ -45,7 +66,7 @@ updatePlaylistName(name) {
 
 savePlaylist() {
   let trackUris= this.state.playListTracks.map(track => track.uri);
-  Spotify.savePlaylist(this.state.playListName, trackUris).then(() => {
+  this.spotify.savePlaylist(this.state.playListName, trackUris).then(() => {
     this.setState({
       playListName: 'New Playlist',
       playListTracks: []
@@ -54,7 +75,7 @@ savePlaylist() {
 }
 
 search(term) {
-  Spotify.search(term).then(searchResults =>{
+  this.spotify.search(term).then(searchResults =>{
     this.setState({searchResults : searchResults})
   })
 }
@@ -77,7 +98,7 @@ search(term) {
                 onNameChange = {this.updatePlaylistName}
                 onSave = {this.savePlaylist}
       />
-      {/* <TrackList trackList = {this.state.trackList} /> */}
+      
     </div>
   </div>
 </div>

@@ -1,36 +1,44 @@
 import SearchBar from "../Components/SearchBar/SearchBar";
-
+import hash from "./hash"
 const clientID = 'e8334f47c0b44466850eb9beff1f3444';
 const redirectUri = 'http://localhost:3000/';
 let accessToken;
 
 const Spotify = {
+    token: null,
 
     getAccessToken() {
-        if(accessToken) {
-            return accessToken;
+        if(this.token) {
+            return this.token;
         }
 
-        const accessTokenMatch = window.location.href.match(/acces_token=([^&]*=)/);
+        const accessTokenMatch = window.location.href.match(/access_token=([^&]*=)/);
         const expiresInMatch = window.location.href.match(/expires_in=([^&]*=)/);
 
         if(accessTokenMatch && expiresInMatch) {
-            accessToken = accessTokenMatch[1];
+            console.info("accessToken1")
+
+            this.token = accessTokenMatch[1];
             const expiresIn = Number(expiresInMatch[1]);
-            window.setTimeout(() => accessToken = '', expiresIn * 1000);
+            window.setTimeout(() => this.token = '', expiresIn * 1000);
             window.history.pushState('Access Token', null, '/');
-            return accessToken;
         } else {
             const accessUrl = `https://accounts.spotify.com/authorize?client_id=${clientID}&response_type=token&scope=playlist-modify-public&redirect_uri=${redirectUri}`;
             window.location = accessUrl;
         }
 
+        return this.token
+
     },
 
     search(term) {
-        const accessToken = Spotify.getAccessToken();
+        const token = Spotify.getAccessToken();
+        
+        console.info(   `Bearer ${this.token}`, term)
        return fetch(`https://api.spotify.com/v1/search?type=track&q=${term}`,
-       {headers: {Authorization: `Bearer ${accessToken}`
+       {
+           headers: {
+               Authorization: `Bearer ${this.token}`
             }
          }).then(response => {
              return response.json();
@@ -51,7 +59,7 @@ const Spotify = {
     savePlaylist(name, trackUris) {
 
         if(!name || !trackUris.length) {
-            return;
+            return Promise.resolve();
         }
         const accessToken = Spotify.getAccessToken();
         const headers = { Authorization:`Bearer ${accessToken}` };
